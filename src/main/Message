@@ -4,15 +4,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Message {
-
 
     private int numMessagesSent = 0;
     private ArrayList<JSONObject> sentMessages = new ArrayList<>();
 
-    public <JSONObject> void sendMessageFlow(int messageNumber) {
+
+    public void sendMessageFlow(int messageNumber) {
         String recipient = JOptionPane.showInputDialog("Enter recipient cell number (e.g., +27821234567):");
         if (!checkRecipient(recipient)) {
             JOptionPane.showMessageDialog(null, "Invalid recipient number. It must start with an international code and have no more than ten characters.");
@@ -31,6 +30,7 @@ public class Message {
 
 
         JSONObject messageDetails = new JSONObject();
+
         messageDetails.put("MessageID", messageID);
         messageDetails.put("Message Hash", messageHash);
         messageDetails.put("Recipient", recipient);
@@ -39,11 +39,11 @@ public class Message {
 
         int choice = JOptionPane.showOptionDialog(
                 null,
-                "Choose an action:\n" +
-                        "MessageID: " + messageID + "\n" +
-                        "Message Hash: " + messageHash + "\n" +
-                        "Recipient: " + recipient + "\n" +
-                        "Message: " + messageContent + "\n",
+                "Choose an action:" +
+                        "MessageID: " + " " + messageID +
+                        "Message Hash: " + " " + messageHash +
+                        "Recipient: " + " " +recipient +
+                        "Message: " + messageContent + " ",
                 "Send Options",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
@@ -55,15 +55,14 @@ public class Message {
         switch (choice) {
             case 0: // Send Message
                 sentMessages.add(messageDetails);
-                JOptionPane.showMessageDialog(null, "Message sent!\n" + messageDetails.toString(4));
+                JOptionPane.showMessageDialog(null, "Message sent!" + messageDetails.toString(4)); // Added \n
                 break;
             case 1: // Disregard Message
                 JOptionPane.showMessageDialog(null, "Message disregarded.");
                 break;
             case 2: // Store Message to send later (in memory)
-                // For simplicity, we'll just store it in the sentMessages list for now
                 sentMessages.add(messageDetails);
-                JOptionPane.showMessageDialog(null, "Message stored to send later (in memory).\n" + messageDetails.toString(4));
+                JOptionPane.showMessageDialog(null, "Message stored to send later (in memory)." + messageDetails.toString(4));
                 break;
             case 3: // Store Message in JSON
                 storeMessageInJSON(messageDetails);
@@ -75,7 +74,7 @@ public class Message {
     }
 
     private boolean checkRecipient(String recipient) {
-        return recipient != null && recipient.length() <= 15 && recipient.startsWith("+"); // Allowing slightly longer for full international code
+        return recipient != null && recipient.matches("^\\+[0-9]{1,3}[0-9]{9,12}$");
     }
 
     private boolean checkMessageLength(String message) {
@@ -100,20 +99,66 @@ public class Message {
     }
 
     private void storeMessageInJSON(JSONObject message) {
-        try (FileWriter file = new FileWriter("stored_messages.json", true)) {
-            if (new java.io.File("stored_messages.json").length() > 0) {
-                file.write("," + message.toString(4));
-            } else {
-                file.write("[" + message.toString(4));
+        try {
+            java.io.File fileObj = new java.io.File("stored_messages.json");
+            boolean fileExists = fileObj.exists() && fileObj.length() > 0;
+
+            try (FileWriter file = new FileWriter(fileObj, true)) {
+                // true for append mode.
+                if (fileExists) {
+
+                    file.write(", " + message.toString(4));
+                    // Append with a comma and newline.
+                } else {
+                    file.write("[ " + message.toString(4));
+                    // Start new JSON array with first object.
+                }
             }
             JOptionPane.showMessageDialog(null, "Message stored in stored_messages.json");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Error storing message in JSON file.");
+            JOptionPane.showMessageDialog(null, "Error storing message in JSON file: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+
+    // This method is for reading the JSON file to ensure it's a valid array.
+
+    private void appendMessageToJSONArrayFile(JSONObject message) {
+        org.json.JSONArray jsonArray = new org.json.JSONArray();
+        java.io.File fileObj = new java.io.File("stored_messages.json");
+
+        if (fileObj.exists() && fileObj.length() > 0) {
+            try (java.io.FileReader reader = new java.io.FileReader(fileObj)) {
+                StringBuilder sb = new StringBuilder();
+                int character;
+                while ((character = reader.read()) != -1) {
+                    sb.append((char) character);
+                }
+                String fileContent = sb.toString();
+
+                if (fileContent.trim().startsWith("[")) {
+                    jsonArray = new org.json.JSONArray(fileContent);
+                }
+            } catch (IOException | org.json.JSONException e) {
+                JOptionPane.showMessageDialog(null, "Error reading existing JSON file: " + e.getMessage());
+                e.printStackTrace();
+                // This method will continue the walkthrough of the array or stop the procedure.
+            }
+        }
+
+        jsonArray.put(message); // A new message is added.
+
+        try (FileWriter file = new FileWriter(fileObj, false)) { // false to overwrite
+            file.write(jsonArray.toString(4)); // Allows the array to be correctly populated.
+            JOptionPane.showMessageDialog(null, "Message stored in stored_messages.json");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error storing message in JSON file: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     public int getTotalMessagesSent() {
         return numMessagesSent;
     }
-}
