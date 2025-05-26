@@ -7,13 +7,14 @@ public class Login {
     private static boolean isLoggedIn = false;
 
     public static void main(String[] args) {
-        // Registration process (remains the same)
+        // This will be the Registration process.
         String firstName;
         String lastName;
         String username;
         String password;
         String cellNumber;
 
+        // This method will allow a user to Register with their name and surname.
         firstName = JOptionPane.showInputDialog("Enter your First name:");
         lastName = JOptionPane.showInputDialog("Enter your Last name:");
 
@@ -40,7 +41,7 @@ public class Login {
         } while (!isCellValid);
         JOptionPane.showMessageDialog(null, "Cellphone number successfully captured.");
 
-        JOptionPane.showMessageDialog(null, "Registration successful! Welcome, " + firstName + " " + lastName + "!");
+        JOptionPane.showMessageDialog(null, "Registration successful! Welcome, " + firstName + " " +lastName + "!");
 
         // Now attempt login
         String loginUsername = JOptionPane.showInputDialog("Enter your username:");
@@ -94,7 +95,10 @@ public class Login {
         int choice = -1;
 
         while (choice != 2) { // 2 is the index for "Quit"
-            String input = JOptionPane.showInputDialog(null, "Choose an option: 1) Send Messages 2) Show recently sent messages 3) Quit", "QuickChat Menu",
+            String input = JOptionPane.showInputDialog(null, "Choose an option: " +
+                            "1) Send Messages " +
+                            "2) Show recently sent messages " +
+                            "3) Quit", "QuickChat Menu",
                     JOptionPane.PLAIN_MESSAGE, null, null, null).toString();
 
             if (input == null) {
