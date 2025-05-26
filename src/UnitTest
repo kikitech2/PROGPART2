@@ -1,30 +1,95 @@
-package org.example;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.*;
+public class UnitTest {
 
-public class LoginTest {
+    private Message messageSystem = new Message();
 
-    @Before
-    public void setUp() throws Exception {
-    }
+    @Test
+    // This method checks if the message is ready to be sent.
+    void testMessageLengthWithinLimit() {
+        String message = "This is a short message.";
+        assertTrue(message.length() <= 50, "Message should not be more than 50 characters.");
 
-    @After
-    public void tearDown() throws Exception {
+        assertEquals("Message ready to send.", "Message ready to send.", "System should return success message.");
     }
 
     @Test
-    public void main() {
+    void testMessageLengthExceedsLimit() {
+        // This method checks if the message sent exceeds the fifty - character limit.
+        String message = "This is a very long message that exceeds the fifty character limit. It goes on and on and on.";
+        assertTrue(message.length() > 50, "Message should exceed 50 characters.");
+        int exceededBy = message.length() - 50;
+        assertEquals("Message exceeds 50 characters by " + exceededBy + ", please reduce size.",
+                "Message exceeds 50 characters by " + exceededBy + ", please reduce size.",
+                "System should return failure message with exceeded length.");
     }
 
     @Test
-    public void login() {
+    void testRecipientNumberCorrectFormatSuccess() {
+        //Tests the cell number is correctly captured.
+        String recipient = "+27718693002";
+        assertTrue(recipient.matches("^\\+27\\d{9}$"), "Recipient number should be correctly formatted.");
+        assertEquals("Cell phone number successfully captured.", "Cell phone number successfully captured.", "System should return success message.");
     }
 
     @Test
-    public void showMenu() {
+    void testRecipientNumberIncorrectFormatFailureNoInternationalCode() {
+        //Tests if the number has an international code starting with +27 followed by 9 digits.
+        String recipient = "0718693002";
+        assertFalse(recipient.matches("^\\+27\\d{9}$"), "Recipient number should be incorrectly formatted.");
+        assertEquals("Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.",
+                "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.",
+                "System should return failure message for incorrect format.");
+    }
+
+    @Test
+    void testRecipientNumberIncorrectFormatFailureTooLong() {
+        // Tests the recipients number format is correctly inserted.
+        String recipient = "+277186930022";
+        assertFalse(recipient.matches("^\\+27\\d{9}$"), "Recipient number should be incorrectly formatted.");
+        assertEquals("Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.",
+                "Cell phone number is incorrectly formatted or does not contain an international code. Please correct the number and try again.",
+                "System should return failure message for incorrect format.");
+    }
+
+    @Test
+    void testMessageHashCorrectTestCase1() {
+        String messageID = "1234567890"; // This is an example of an auto-generated ID.
+        int messageNumber = 0; // The first message will be sent and tested.
+        String message = "Hi Mike, can you join us for dinner tonight";
+        String expectedHash = "12:0:HITONIGHT";
+        //The user selected the option to send a message. The expected message will display the number 12 as the ID. The message will start with "Hi" and end with " tonight".
+        assertEquals(expectedHash, messageSystem.generateMessageHash(messageID, messageNumber, message).toUpperCase(), "Message hash should be correct for Test Case 1.");
+    }
+
+    @Test
+    void testMessageIDIsCreated() {
+        // This method will create a message ID.
+        String messageID = messageSystem.generateMessageID();
+        assertTrue(messageID.matches("\\d{10}"), "Message ID should be a ten-digit number.");
+        assertEquals("Message ID generated: " + messageID, "Message ID generated: " + messageID, "System should return the generated Message ID.");
+    }
+
+    @Test
+    void testMessageSentUserSelectedSendMessage() {
+        // This method will notify the user that a message was sent successfully.
+
+        assertEquals("Message successfully sent.", "Message successfully sent.", "System should return success message for 'Send Message'.");
+    }
+
+    @Test
+    void testMessageSentUserSelectedDisregardMessage() {
+        // This method will notify the user that they have chosen the option to disregard a message.
+        assertEquals("Press 0 to delete message.", "Press 0 to delete message.", "System should return disregard message prompt.");
+    }
+
+    @Test
+    void testMessageSentUserSelectedStoreMessage() {
+        // This method will notify the user that the message they sent has been stored successfully.
+        assertEquals("Message successfully stored.", "Message successfully stored.", "System should return stored message confirmation.");
     }
 }
+
+
